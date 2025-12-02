@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Miguel's Länderanalyse – Schreib-Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #020617;
+      color: #f9fafb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .app {
+      width: 100%;
+      max-width: 760px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .brand-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+    .brand-sub {
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: radial-gradient(circle at top, #111827, #020617);
+    }
+    .subtitle {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      margin-bottom: 14px;
+    }
+    .card {
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      border-radius: 18px;
+      padding: 18px 16px 14px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+      border: 1px solid #1f2937;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .tag-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+    .pill {
+      padding: 2px 10px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: rgba(15,23,42,0.9);
+      font-size: 0.75rem;
+    }
+    .counter {
+      font-size: 0.8rem;
+    }
+    .question {
+      font-size: 1rem;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      background: rgba(15,23,42,0.9);
+      color: #e5e7eb;
+      padding: 8px 10px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      resize: vertical;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 1px rgba(79,70,229,0.5);
+    }
+    .label {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin-bottom: 2px;
+    }
+    .answer {
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: #d1d5db;
+      display: none;
+      border-top: 1px dashed #374151;
+      padding-top: 8px;
+    }
+    .answer.visible {
+      display: block;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+    button {
+      flex: 1;
+      padding: 9px 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #1f2937;
+      transition: background 0.15s, transform 0.1s, border-color 0.15s;
+    }
+    button.primary {
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      border-color: transparent;
+      color: white;
+    }
+    button.small {
+      flex: 0;
+      padding-inline: 10px;
+      font-size: 0.75rem;
+    }
+    button:active {
+      transform: scale(0.97);
+    }
+    .hint {
+      margin-top: 8px;
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+    ul {
+      margin-left: 18px;
+      margin-top: 6px;
+    }
+    @media (min-width: 640px) {
+      .brand-title { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="brand-title">Miguel's Länderanalyse</div>
+        <div class="brand-sub">Emerging Asia • Schreib-Quiz</div>
+      </div>
+      <div class="badge">HRW • WS 25/26</div>
+    </header>
+    <p class="subtitle">
+      Schreib zuerst deine eigene Antwort in das Feld. Erst danach auf „Lösung anzeigen“ klicken und vergleichen.
+    </p>
+
+    <div class="card" id="card">
+      <div>
+        <div class="tag-row">
+          <span class="pill" id="topicPill">Thema</span>
+          <span class="counter" id="counter">1 / 1</span>
+        </div>
+        <div class="question" id="questionText"></div>
+      </div>
+
+      <div>
+        <div class="label">Deine Antwort:</div>
+        <textarea id="userAnswer" placeholder="Formuliere die Definition oder erkläre den Begriff in eigenen Worten..."></textarea>
+      </div>
+
+      <div>
+        <button class="primary" id="toggleAnswerBtn">Lösung anzeigen</button>
+        <div class="answer" id="answerText"></div>
+      </div>
+
+      <div class="controls">
+        <button id="prevBtn">⟵ Zurück</button>
+        <button id="clearBtn">Antwort löschen</button>
+        <button id="nextBtn">Weiter ⟶</button>
+        <button class="small" id="shuffleBtn">🔀 Shuffle</button>
+      </div>
+
+      <p class="hint">
+        Lern-Tipp: Schreib in Stichpunkten &amp; check nur, ob die Kerngedanken stimmen – keine Panik wegen Formulierungen.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const cards = [
+      {
+        topic: "Emerging Markets",
+        q: "Definiere: Was sind Emerging Markets?",
+        a: "Länder, die sich im Übergang vom Entwicklungsland zum Industrieland befinden – mit wachsendem Einkommen, Industrialisierung und Integration in die Weltwirtschaft."
+      },
+      {
+        topic: "Emerging Markets",
+        q: "Nenne typische Merkmale von Emerging Markets.",
+        a: "<ul><li>Überdurchschnittliches Wachstumspotenzial.</li><li>Große Marktpotentiale und Expansionsmöglichkeiten für Unternehmen.</li><li>Benötigen oft spezielle Internationalisierungsstrategien.</li></ul>"
+      },
+      {
+        topic: "Emerging Asia",
+        q: "Erkläre kurz, was man unter „Emerging Asia“ versteht und nenne Beispiele für Länder.",
+        a: "Gruppe dynamisch wachsender asiatischer Volkswirtschaften. Typische Länder: China, Indien, Malaysia, Thailand, Vietnam, Philippinen."
+      },
+      {
+        topic: "Länderklassifikation",
+        q: "Wie klassifiziert die Weltbank Länder? Nenne das Kriterium und die vier Gruppen.",
+        a: "Kriterium: GNI pro Kopf (Einkommensniveau). Gruppen: Low Income, Lower Middle Income, Upper Middle Income, High Income."
+      },
+      {
+        topic: "Länderklassifikation",
+        q: "Wie werden Länder von der UNO nach Entwicklungsstand eingeteilt?",
+        a: "In: Low Human Development, Medium Human Development, High Human Development (oft gemessen über den HDI)."
+      },
+      {
+        topic: "Länderklassifikation",
+        q: "Welche drei Kategorien verwendet der IMF für Ländergruppen?",
+        a: "Low Income Developing Countries, Emerging Economies, Advanced Countries."
+      },
+      {
+        topic: "Wirtschaftlicher Aufstieg",
+        q: "Erkläre, was BIP pro Kopf misst und warum es wichtig ist.",
+        a: "BIP pro Kopf = wirtschaftliche Leistung pro Einwohner (BIP / Bevölkerungszahl). Zeigt grob das durchschnittliche Einkommens- und Wohlstandsniveau."
+      },
+      {
+        topic: "Wirtschaftlicher Aufstieg",
+        q: "Nenne mindestens drei Indikatoren, mit denen man den wirtschaftlichen Aufstieg asiatischer Länder beschreiben kann.",
+        a: "BIP pro Kopf, BIP-Wachstum, Sektorenstruktur, Außenhandelsquote, ausländische Direktinvestitionen (FDI/ADI)."
+      },
+      {
+        topic: "Fluggänsemodell",
+        q: "Beschreibe das Fluggänsemodell verständlich in 2–3 Sätzen.",
+        a: "Ein Leitland (z. B. Japan) entwickelt zuerst bestimmte Industrien und exportiert Industrieprodukte. Wenn Löhne dort steigen, werden arbeitsintensive Produktionen in Länder mit niedrigeren Löhnen verlagert. Diese Länder holen technologisch auf und folgen dem Leitland stufenweise in der Entwicklung."
+      },
+      {
+        topic: "Zwischenstaatliche Beziehungen",
+        q: "Zähle die vier Teilbereiche der zwischenstaatlichen Wirtschaftsbeziehungen auf und nenne zu jedem ein Beispiel.",
+        a: "<ul><li>Handel – z. B. Warenexporte/-importe.</li><li>Direktinvestitionen – z. B. deutsche Fabrik in Vietnam.</li><li>Institutionen/Wirtschaftsabkommen – z. B. Freihandelsabkommen, WTO-Regeln.</li><li>Geschäftsklima – z. B. Geschäftsklimaindex für ein Land.</li></ul>"
+      },
+      {
+        topic: "Bedeutung Asiens",
+        q: "Nenne die fünf wichtigsten asiatischen Handelspartner Deutschlands und schreibe kurz, was grob gehandelt wird.",
+        a: "China, Japan, Südkorea, Indien, Taiwan. Deutschland exportiert u. a. Autos, Maschinen, Hightech, Chemie. Aus Asien kommen u. a. Elektronik, Vorprodukte, Textilien, Konsumgüter."
+      },
+      {
+        topic: "Heckscher-Ohlin",
+        q: "Erkläre das Heckscher-Ohlin-Theorem mit eigenen Worten.",
+        a: "Ein Land exportiert die Güter, bei denen sein reichlich vorhandener Produktionsfaktor (Arbeit oder Kapital) intensiv genutzt wird, und importiert Güter, bei denen der knappe Faktor intensiv ist."
+      },
+      {
+        topic: "Politisches System",
+        q: "Was ist ein politisches System und welche drei Dimensionen (Policy, Politics, Polity) unterscheidet man?",
+        a: "Politisches System = Strukturen, Prozesse und Inhalte, die das Zusammenleben im Staat regeln. Policy: Inhalte/Programme/Ziele. Politics: Prozesse, Konflikte, Wahlen. Polity: formale Strukturen, Verfassung, Institutionen."
+      },
+      {
+        topic: "Geopolitik",
+        q: "Beschreibe kurz, was ein geopolitischer Schock ist und nenne ein Beispiel mit wirtschaftlicher Folge.",
+        a: "Plötzliches politisches Ereignis mit starken wirtschaftlichen Folgen, z. B. Terroranschlag, Handelskrieg, Pandemie. Folgen können sein: Einbruch von Tourismus, höhere Energiepreise, Rückzug ausländischer Investoren, sinkender Konsum."
+      },
+      {
+        topic: "Soziale Struktur",
+        q: "Nenne mindestens drei Dimensionen der Sozialstruktur eines Landes und je einen passenden Indikator.",
+        a: "<ul><li>Demografische Struktur – z. B. Altersstruktur, Fertilitätsrate, Abhängigkeitsquote.</li><li>Beschäftigung – Erwerbsbeteiligung, Beschäftigungsquote.</li><li>Bildung – Bildungsstand der Bevölkerung ab 25.</li><li>Ungleichheit – Gini-Koeffizient, Armutsquote.</li><li>Gesundheit – Lebenserwartung, Säuglings- und Suizidsterblichkeit.</li></ul>"
+      },
+      {
+        topic: "Ungleichheit",
+        q: "Erkläre Gini-Koeffizient und Armutsquote in einem Satz je Indikator.",
+        a: "Gini-Koeffizient: Maß für die Ungleichverteilung von Einkommen zwischen Haushalten. Armutsquote: Anteil der Bevölkerung, der unterhalb der definierten Armutsgrenze lebt."
+      },
+      {
+        topic: "Dualistische Struktur",
+        q: "Beschreibe die dualistische Struktur eines Landes mit einem konkreten Beispiel.",
+        a: "Duale Struktur = Nebeneinander eines modernen, produktiven, oft exportorientierten Sektors und eines traditionellen, wenig produktiven Sektors. Beispiel: High-Tech-Städte und Industriezentren mit hohen Löhnen vs. ländliche Agrarregionen mit niedrigen Einkommen und schwacher Infrastruktur (z. B. Küstenregionen vs. Binnenprovinzen in China oder IT-Städte vs. ländliche Gebiete in Indien)."
+      },
+      {
+        topic: "Eisbergmodell",
+        q: "Erkläre das Eisbergmodell der Kultur: Was sind Perceptas und was sind Conceptas?",
+        a: "Perceptas: sichtbare Elemente wie Verhalten, Gesten, Medien, Gebäude. Conceptas: unsichtbare Werte, Normen, Denkweisen, Gefühle, die das sichtbare Verhalten eigentlich erklären."
+      },
+      {
+        topic: "Asiatische Kultur",
+        q: "Nenne drei Beispiele für asiatische Kulturphänomene und ordne jeweils eine dahinterliegende Wertvorstellung zu.",
+        a: "Beispiele: K-Wave ↔ Attraktivität, Modernität, Popkultur; Essen mit Stäbchen/gemeinsame Mahlzeit ↔ Gemeinschaft, Harmonie; langes Arbeiten und Leistungsorientierung ↔ Disziplin, Fleiß, Bildungserfolg."
+      },
+      {
+        topic: "Soft Power",
+        q: "Definiere Soft Power und erkläre, wie Südkorea sie mit der K-Wave einsetzt.",
+        a: "Soft Power = andere durch Attraktivität von Kultur, Werten und Politik beeinflussen statt durch Zwang (Hard Power). Südkorea nutzt K-Pop, Serien, Mode und Essen, um das Land attraktiv zu machen, Tourismus, Spracherwerb und Nachfrage nach koreanischen Produkten zu steigern."
+      },
+      {
+        topic: "Innovation",
+        q: "Was misst die „Taxonomy of Economic Activities based on R&D Intensity“ und was bedeutet technologische Intensität?",
+        a: "Sie teilt Branchen nach ihrer Forschungs- und Entwicklungsintensität ein (F&E-Ausgaben im Verhältnis zur Wertschöpfung). Technologische Intensität beschreibt, wie stark ein Sektor auf Forschung, Entwicklung und Hightech basiert."
+      }
+    ];
+
+    let index = 0;
+    let answerVisible = false;
+
+    const topicPill = document.getElementById("topicPill");
+    const counter = document.getElementById("counter");
+    const questionText = document.getElementById("questionText");
+    const userAnswer = document.getElementById("userAnswer");
+    const answerText = document.getElementById("answerText");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const toggleAnswerBtn = document.getElementById("toggleAnswerBtn");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const cardEl = document.getElementById("card");
+
+    function renderCard() {
+      const card = cards[index];
+      topicPill.textContent = card.topic;
+      counter.textContent = (index + 1) + " / " + cards.length;
+      questionText.textContent = card.q;
+      answerText.innerHTML = card.a;
+      if (answerVisible) {
+        answerText.classList.add("visible");
+        toggleAnswerBtn.textContent = "Lösung verstecken";
+      } else {
+        answerText.classList.remove("visible");
+        toggleAnswerBtn.textContent = "Lösung anzeigen";
+      }
+    }
+
+    function nextCard() {
+      index = (index + 1) % cards.length;
+      answerVisible = false;
+      userAnswer.value = "";
+      renderCard();
+      userAnswer.focus();
+    }
+
+    function prevCard() {
+      index = (index - 1 + cards.length) % cards.length;
+      answerVisible = false;
+      userAnswer.value = "";
+      renderCard();
+      userAnswer.focus();
+    }
+
+    function shuffleCards() {
+      for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+      }
+      index = 0;
+      answerVisible = false;
+      userAnswer.value = "";
+      renderCard();
+      userAnswer.focus();
+    }
+
+    toggleAnswerBtn.addEventListener("click", () => {
+      answerVisible = !answerVisible;
+      renderCard();
+    });
+
+    nextBtn.addEventListener("click", nextCard);
+    prevBtn.addEventListener("click", prevCard);
+    shuffleBtn.addEventListener("click", shuffleCards);
+    clearBtn.addEventListener("click", () => {
+      userAnswer.value = "";
+      userAnswer.focus();
+    });
+
+    // Keyboard navigation (am Laptop)
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") nextCard();
+      if (e.key === "ArrowLeft") prevCard();
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        answerVisible = !answerVisible;
+        renderCard();
+      }
+    });
+
+    // Swipe für Handy
+    let startX = null;
+    cardEl.addEventListener("touchstart", (e) => {
+      startX = e.touches[0].clientX;
+    });
+    cardEl.addEventListener("touchend", (e) => {
+      if (startX === null) return;
+      const endX = e.changedTouches[0].clientX;
+      const diff = endX - startX;
+      if (Math.abs(diff) > 50) {
+        if (diff < 0) nextCard();
+        else prevCard();
+      }
+      startX = null;
+    });
+
+    renderCard();
+    userAnswer.focus();
+  </script>
+</body>
+</html>
