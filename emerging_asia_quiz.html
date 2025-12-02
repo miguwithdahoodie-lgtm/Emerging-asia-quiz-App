@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Emerging Asia – Lernquiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #050816;
+      color: #f9fafb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .app {
+      width: 100%;
+      max-width: 700px;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #9ca3af;
+      margin-bottom: 16px;
+    }
+    .card {
+      background: radial-gradient(circle at top, #111827, #020617);
+      border-radius: 18px;
+      padding: 18px 16px 16px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+      border: 1px solid #1f2937;
+      min-height: 220px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .tag-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+    .pill {
+      padding: 2px 10px;
+      border-radius: 999px;
+      border: 1px solid #374151;
+      background: rgba(15,23,42,0.9);
+      font-size: 0.75rem;
+    }
+    .counter {
+      font-size: 0.8rem;
+    }
+    .question {
+      margin-top: 4px;
+      font-size: 1rem;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+    .answer {
+      margin-top: 12px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+      color: #d1d5db;
+      display: none;
+      border-top: 1px dashed #374151;
+      padding-top: 10px;
+    }
+    .answer.visible {
+      display: block;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    button {
+      flex: 1;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #1f2937;
+      transition: background 0.15s, transform 0.1s, border-color 0.15s;
+    }
+    button.primary {
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      border-color: transparent;
+      color: white;
+    }
+    button.small {
+      flex: 0;
+      padding-inline: 10px;
+      font-size: 0.75rem;
+    }
+    button:active {
+      transform: scale(0.97);
+    }
+    .hint {
+      margin-top: 10px;
+      font-size: 0.75rem;
+      color: #9ca3af;
+      text-align: center;
+    }
+    ul {
+      margin-left: 18px;
+      margin-top: 6px;
+    }
+    @media (min-width: 640px) {
+      h1 { font-size: 1.7rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Emerging Asia – Lernquiz</h1>
+    <p class="subtitle">Tippe auf „Antwort zeigen“ &amp; swipe links/rechts für nächste Karte.</p>
+    <div class="card" id="card">
+      <div>
+        <div class="tag-row">
+          <span class="pill" id="topicPill">Thema</span>
+          <span class="counter" id="counter">1 / 1</span>
+        </div>
+        <div class="question" id="questionText"></div>
+        <div class="answer" id="answerText"></div>
+      </div>
+      <div>
+        <div class="controls">
+          <button id="prevBtn">⟵ Zurück</button>
+          <button class="primary" id="toggleAnswerBtn">Antwort zeigen</button>
+          <button id="nextBtn">Weiter ⟶</button>
+        </div>
+        <div class="controls" style="margin-top:8px;">
+          <button class="small" id="shuffleBtn">🔀 Shuffle</button>
+          <button class="small" id="hideAnswersBtn">🙈 Antworten verstecken</button>
+        </div>
+        <p class="hint">Tipp: Versuch erst laut zu antworten, <br> erst dann auf „Antwort zeigen“ drücken.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const cards = [
+      {
+        topic: "Emerging Markets",
+        q: "Definiere: Was sind Emerging Markets?",
+        a: "Länder, die sich im Übergang vom Entwicklungsland zum Industrieland befinden – mit wachsendem Einkommen, Industrialisierung und Integration in die Weltwirtschaft."
+      },
+      {
+        topic: "Emerging Markets",
+        q: "Nenne zwei typische Merkmale von Emerging Markets.",
+        a: "<ul><li>Überdurchschnittliches Wachstumspotenzial.</li><li>Große Marktpotentiale und Expansionsmöglichkeiten für Unternehmen.</li><li>Benötigen oft spezielle Internationalisierungsstrategien.</li></ul>"
+      },
+      {
+        topic: "Emerging Asia",
+        q: "Was versteht man unter „Emerging Asia“? Nenne auch mindestens drei Länder.",
+        a: "Gruppe dynamisch wachsender asiatischer Volkswirtschaften. Typische Länder: China, Indien, Malaysia, Thailand, Vietnam, Philippinen."
+      },
+      {
+        topic: "Länderklassifikation",
+        q: "Wie klassifiziert die Weltbank Länder nach Einkommen?",
+        a: "Nach GNI pro Kopf (Einkommen). Kategorien: Low Income, Lower Middle Income, Upper Middle Income, High Income."
+      },
+      {
+        topic: "Länderklassifikation",
+        q: "Wie teilt die UNO Länder nach Entwicklungsstand ein?",
+        a: "In: Low Human Development, Medium Human Development, High Human Development (gemessen z. B. über den HDI)."
+      },
+      {
+        topic: "Länderklassifikation",
+        q: "Welche drei Gruppen verwendet der IMF?",
+        a: "Low Income Developing Countries, Emerging Economies, Advanced Countries."
+      },
+      {
+        topic: "Wirtschaftlicher Aufstieg",
+        q: "Was misst das BIP pro Kopf (GDP per capita)?",
+        a: "Die wirtschaftliche Leistung pro Einwohner – also BIP geteilt durch die Bevölkerungszahl."
+      },
+      {
+        topic: "Wirtschaftlicher Aufstieg",
+        q: "Nenne drei Indikatoren für den wirtschaftlichen Aufstieg asiatischer Länder.",
+        a: "<ul><li>BIP pro Kopf (GDP per capita).</li><li>BIP-Wachstum.</li><li>Sektorenstruktur.</li><li>Außenhandelsquote.</li><li>Ausländische Direktinvestitionen (FDI/ADI).</li></ul>"
+      },
+      {
+        topic: "Fluggänsemodell",
+        q: "Erkläre das Fluggänsemodell in einfachen Worten.",
+        a: "Ein Leitland (z. B. Japan) entwickelt zuerst eine Industrie, exportiert Industrieprodukte und verlagert bei steigenden Löhnen arbeitsintensive Produktion in ärmere Länder. Diese folgen dem Leitland stufenweise in der Entwicklung."
+      },
+      {
+        topic: "Zwischenstaatliche Beziehungen",
+        q: "Nenne die vier Teilbereiche zwischenstaatlicher Wirtschaftsbeziehungen.",
+        a: "Handel, Direktinvestitionen, Institutionen/Wirtschaftsabkommen, Geschäftsklima."
+      },
+      {
+        topic: "Handel",
+        q: "Was ist die Handelsbilanz und wie interpretiert man Überschuss und Defizit?",
+        a: "Handelsbilanz = Export minus Import von Waren. Überschuss: Exporte &gt; Importe. Defizit: Importe &gt; Exporte."
+      },
+      {
+        topic: "Bedeutung Asiens",
+        q: "Nenne die fünf wichtigsten asiatischen Handelspartner Deutschlands.",
+        a: "China, Japan, Südkorea, Indien, Taiwan."
+      },
+      {
+        topic: "Bedeutung Asiens",
+        q: "Nenne zwei Gründe, warum Asien für die deutsche Wirtschaft wichtig ist.",
+        a: "<ul><li>Wichtiger Absatzmarkt und Lieferant (Autos, Maschinen vs. Elektronik, Textilien etc.).</li><li>Produktions- und Lieferkettenstandort – Vorprodukte werden in Asien hergestellt.</li><li>Wachsende Mittelschicht und Zukunftsmärkte.</li></ul>"
+      },
+      {
+        topic: "Heckscher-Ohlin",
+        q: "Was besagt das Heckscher-Ohlin-Theorem?",
+        a: "Ein Land exportiert die Güter, für deren Produktion sein reichlich vorhandener Faktor intensiv genutzt wird (z. B. Arbeit oder Kapital), und importiert Güter, bei denen der knappe Faktor intensiv ist."
+      },
+      {
+        topic: "Heckscher-Ohlin",
+        q: "Welche Güter exportiert Deutschland laut Theorie eher, welche viele asiatische Länder?",
+        a: "Deutschland: eher kapitalintensive Güter (z. B. Maschinen, Autos). Viele asiatische Länder: eher arbeitsintensive Güter (z. B. Textilien, einfache Industriewaren)."
+      },
+      {
+        topic: "Politisches System",
+        q: "Was ist ein politisches System?",
+        a: "Die Gesamtheit der Strukturen, Prozesse und Inhalte, die das Zusammenleben der Menschen in einem Staat politisch regeln."
+      },
+      {
+        topic: "Politisches System",
+        q: "Nenne die drei Dimensionen des politischen Systems (Policy, Politics, Polity).",
+        a: "<ul><li>Policy – Inhalte: Programme, Ziele, materielle Entscheidungen.</li><li>Politics – Prozesse: Wahlen, Abstimmungen, Konflikte, Interessenvertretung.</li><li>Polity – Strukturen: Verfassung, Institutionen, formale Ordnung.</li></ul>"
+      },
+      {
+        topic: "Geopolitik",
+        q: "Was ist ein geopolitischer Schock? Nenne ein Beispiel.",
+        a: "Ein plötzliches politisch-ökonomisches Ereignis mit starken wirtschaftlichen Folgen, z. B. Terroranschläge (9/11), Pandemie, Handelskrieg oder starke Sanktionen."
+      },
+      {
+        topic: "Soziale Struktur",
+        q: "Nenne drei Dimensionen der Sozialstruktur eines Landes.",
+        a: "Demografische Struktur, Beschäftigung, Bildung, Ungleichheit, Gesundheit (mind. drei nennen)."
+      },
+      {
+        topic: "Ungleichheit",
+        q: "Erkläre den Gini-Koeffizienten.",
+        a: "Maß für die Ungleichverteilung von Einkommen: 0 = vollkommen gleich, 1 (bzw. 100) = extreme Ungleichheit. Zeigt, wie ungleich Haushaltseinkommen verteilt sind."
+      },
+      {
+        topic: "Gesundheit",
+        q: "Was misst die Säuglingssterblichkeit?",
+        a: "Wie viele Kinder vor dem 1. Geburtstag (hier: oft innerhalb von 28 Tagen) pro 1.000 Lebendgeburten sterben."
+      },
+      {
+        topic: "Dualistische Struktur",
+        q: "Was ist eine dualistische Struktur in Wirtschaft und Gesellschaft?",
+        a: "Nebeneinander eines modernen, produktiven, oft exportorientierten Sektors und eines traditionellen, wenig produktiven Sektors (z. B. High-Tech-Städte vs. arme Agrarregionen)."
+      },
+      {
+        topic: "Eisbergmodell",
+        q: "Was sind im Eisbergmodell Perceptas und was sind Conceptas?",
+        a: "Perceptas: sichtbare kulturelle Elemente (Verhalten, Rituale, Gebäude). Conceptas: unsichtbare Werte, Normen, Denkweisen und Gefühle dahinter."
+      },
+      {
+        topic: "Asiatische Kultur",
+        q: "Nenne drei Beispiele asiatischer Kultur aus deinem Stoff.",
+        a: "K-Wave (K-Pop, K-Dramen etc.), Essen mit Stäbchen und Reiskultur, starke Arbeits- und Leistungsorientierung (z. B. lange Arbeitszeiten, Fokus auf Bildung)."
+      },
+      {
+        topic: "Soft Power",
+        q: "Erkläre Soft Power und gib ein Beispiel aus Asien.",
+        a: "Soft Power = andere durch Attraktivität, Kultur und Werte beeinflussen statt durch Zwang. Beispiel: K-Wave macht Südkorea attraktiv, fördert Tourismus, Spracherwerb und Konsum koreanischer Produkte."
+      },
+      {
+        topic: "Innovation",
+        q: "Worum geht es bei der „Taxonomy of Economic Activities based on R&D Intensity“?",
+        a: "Einteilung von Branchen nach ihrer Forschungs- und Entwicklungsintensität – also wie stark sie gemessen an der Wertschöpfung in F&E investieren."
+      }
+    ];
+
+    let index = 0;
+    let answerVisible = false;
+
+    const topicPill = document.getElementById("topicPill");
+    const counter = document.getElementById("counter");
+    const questionText = document.getElementById("questionText");
+    const answerText = document.getElementById("answerText");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const toggleAnswerBtn = document.getElementById("toggleAnswerBtn");
+    const shuffleBtn = document.getElementById("shuffleBtn");
+    const hideAnswersBtn = document.getElementById("hideAnswersBtn");
+    const cardEl = document.getElementById("card");
+
+    function renderCard() {
+      const card = cards[index];
+      topicPill.textContent = card.topic;
+      counter.textContent = (index + 1) + " / " + cards.length;
+      questionText.textContent = card.q;
+      answerText.innerHTML = card.a;
+      if (answerVisible) {
+        answerText.classList.add("visible");
+        toggleAnswerBtn.textContent = "Antwort verstecken";
+      } else {
+        answerText.classList.remove("visible");
+        toggleAnswerBtn.textContent = "Antwort zeigen";
+      }
+    }
+
+    function nextCard() {
+      index = (index + 1) % cards.length;
+      answerVisible = false;
+      renderCard();
+    }
+
+    function prevCard() {
+      index = (index - 1 + cards.length) % cards.length;
+      answerVisible = false;
+      renderCard();
+    }
+
+    function shuffleCards() {
+      for (let i = cards.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cards[i], cards[j]] = [cards[j], cards[i]];
+      }
+      index = 0;
+      answerVisible = false;
+      renderCard();
+    }
+
+    toggleAnswerBtn.addEventListener("click", () => {
+      answerVisible = !answerVisible;
+      renderCard();
+    });
+
+    nextBtn.addEventListener("click", nextCard);
+    prevBtn.addEventListener("click", prevCard);
+    shuffleBtn.addEventListener("click", shuffleCards);
+    hideAnswersBtn.addEventListener("click", () => {
+      answerVisible = false;
+      renderCard();
+    });
+
+    // Keyboard navigation
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") nextCard();
+      if (e.key === "ArrowLeft") prevCard();
+      if (e.key === " ") {
+        e.preventDefault();
+        answerVisible = !answerVisible;
+        renderCard();
+      }
+    });
+
+    // Simple swipe support for touch devices
+    let startX = null;
+    cardEl.addEventListener("touchstart", (e) => {
+      startX = e.touches[0].clientX;
+    });
+    cardEl.addEventListener("touchend", (e) => {
+      if (startX === null) return;
+      const endX = e.changedTouches[0].clientX;
+      const diff = endX - startX;
+      if (Math.abs(diff) > 50) {
+        if (diff < 0) nextCard();
+        else prevCard();
+      }
+      startX = null;
+    });
+
+    renderCard();
+  </script>
+</body>
+</html>
